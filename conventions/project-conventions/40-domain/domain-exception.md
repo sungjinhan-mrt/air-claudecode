@@ -1,41 +1,41 @@
-# Domain Exception Handling
+# 도메인 예외 처리
 
-> Each domain feature has its own `{Feature}Error` enum, `{Feature}Exception` base class, and specific exception subclasses.
+> 각 도메인 기능은 고유한 `{Feature}Error` Enum, `{Feature}Exception` 기본 클래스, 세부 예외 하위 클래스를 가진다.
 
-## Exception Hierarchy
+## 예외 계층
 
 ```
-BizRuntimeException (common) -- unrecoverable business errors, with stack trace
-BizException (common) -- recoverable business errors, with stack trace
-KnownException (common) -- expected errors (validation, not found), no stack trace
-  └── {Feature}Exception (domain) -- feature-specific base, open class
+BizRuntimeException (common) -- 복구 불가 비즈니스 오류, 스택 트레이스 포함
+BizException (common) -- 복구 가능 비즈니스 오류, 스택 트레이스 포함
+KnownException (common) -- 예상 가능한 오류 (유효성 검증, 미존재), 스택 트레이스 없음
+  └── {Feature}Exception (domain) -- 기능별 기본, open class
         ├── {Feature}NotFoundException
         ├── {Feature}AlreadyExistsException
         └── {Feature}InvalidStateException
 ```
 
-| Class | Module | Purpose | HTTP Status | Stack Trace |
-|---|---|---|---|---|
-| `BizRuntimeException` | common | Unrecoverable errors (data integrity failures) | 500 | Yes |
-| `BizException` | common | Recoverable business errors | 500 | Yes |
-| `KnownException` | common | Expected errors -- logged at INFO | 406 | No |
-| `{Feature}Exception` | domain | Feature-specific base; extends `KnownException` | 406 | No |
-| `{Feature}NotFoundException` | domain | Entity not found within the feature | 406 | No |
+| 클래스 | 모듈 | 용도 | HTTP 상태 | 스택 트레이스 |
+|--------|------|------|-----------|---------------|
+| `BizRuntimeException` | common | 복구 불가 오류 (데이터 무결성 장애) | 500 | 포함 |
+| `BizException` | common | 복구 가능 비즈니스 오류 | 500 | 포함 |
+| `KnownException` | common | 예상 가능한 오류 — INFO로 로깅 | 406 | 없음 |
+| `{Feature}Exception` | domain | 기능별 기본, `KnownException` 상속 | 406 | 없음 |
+| `{Feature}NotFoundException` | domain | 기능 내 엔티티 미존재 | 406 | 없음 |
 
 ---
 
-## Package Structure
+## 패키지 구조
 
 ```
 domain/{feature}/
 └── exception/
-    ├── {Feature}Error.kt        # Error code enum implementing ResponseCode
-    └── {Feature}Exception.kt    # Base exception + all subclasses
+    ├── {Feature}Error.kt        # ResponseCode를 구현하는 에러 코드 Enum
+    └── {Feature}Exception.kt    # 기본 예외 + 모든 하위 클래스
 ```
 
 ---
 
-## Error Code Enum
+## 에러 코드 Enum
 
 ```kotlin
 enum class HolidayError(
@@ -50,36 +50,36 @@ enum class HolidayError(
 }
 ```
 
-### Naming Conventions
+### 네이밍 규칙
 
-| Element | Convention | Example |
-|---|---|---|
-| Enum class name | `{Feature}Error` | `HolidayError` |
-| Constant name | `SCREAMING_SNAKE_CASE` | `NOT_FOUND`, `ALREADY_EXISTS` |
-| Code value | `{FEATURE}_{3-digit sequence}` | `HOLIDAY_001` |
-| Message language | Korean | `"공휴일 정보를 찾을 수 없습니다."` |
-| Default HTTP status | `406 NOT_ACCEPTABLE` | `HttpStatus.NOT_ACCEPTABLE` |
+| 요소 | 표기법 | 예시 |
+|------|--------|------|
+| Enum 클래스명 | `{Feature}Error` | `HolidayError` |
+| 상수명 | `SCREAMING_SNAKE_CASE` | `NOT_FOUND`, `ALREADY_EXISTS` |
+| 코드값 | `{FEATURE}_{3자리 순번}` | `HOLIDAY_001` |
+| 메시지 언어 | 한글 | `"공휴일 정보를 찾을 수 없습니다."` |
+| 기본 HTTP 상태 | `406 NOT_ACCEPTABLE` | `HttpStatus.NOT_ACCEPTABLE` |
 
-Use `{Feature}Error` for feature-specific errors. Use common `ErrorCode` for generic validation or input format errors at the API layer.
+기능별 오류에는 `{Feature}Error`를 사용한다. API 계층의 범용 유효성 검증이나 입력 형식 오류에는 공통 `ErrorCode`를 사용한다.
 
 ---
 
-## Exception Classes
+## 예외 클래스
 
 ```kotlin
-// Base exception -- must be open class
+// 기본 예외 — open class여야 한다
 open class HolidayException(
     error: HolidayError,
     message: String = error.message,
 ) : KnownException(error, message)
 
-// Specific subclass
+// 특정 하위 클래스
 class HolidayNotFoundException(holidayId: Long) : HolidayException(
     error = HolidayError.NOT_FOUND,
     message = "공휴일 정보를 찾을 수 없습니다. holidayId=$holidayId",
 )
 
-// Without subclass -- for rare or one-off errors
+// 하위 클래스 없이 사용 — 드물거나 일회성 오류
 throw HolidayException(HolidayError.CANNOT_DELETE_PAST)
 throw HolidayException(
     error = HolidayError.INVALID_DATE_RANGE,
@@ -87,19 +87,19 @@ throw HolidayException(
 )
 ```
 
-### Subclass Patterns
+### 하위 클래스 패턴
 
-| Subclass | Constructor parameter | Message pattern |
-|---|---|---|
-| `{Feature}NotFoundException` | Entity identifier (`id: Long`) | `"... 찾을 수 없습니다. {feature}Id=$id"` |
-| `{Feature}AlreadyExistsException` | Unique key (`date: LocalDate`) | `"이미 등록되어 있습니다. date=$date"` |
-| `{Feature}InvalidStateException` | Current state value | `"올바르지 않은 상태입니다. status=$status"` |
+| 하위 클래스 | 생성자 파라미터 | 메시지 패턴 |
+|-------------|----------------|-------------|
+| `{Feature}NotFoundException` | 엔티티 식별자 (`id: Long`) | `"... 찾을 수 없습니다. {feature}Id=$id"` |
+| `{Feature}AlreadyExistsException` | 유니크 키 (`date: LocalDate`) | `"이미 등록되어 있습니다. date=$date"` |
+| `{Feature}InvalidStateException` | 현재 상태 값 | `"올바르지 않은 상태입니다. status=$status"` |
 
 ---
 
-## Usage in Service
+## Service에서의 사용
 
-Throw exceptions in the **Service layer only**. Always include relevant context in the message.
+**Service 계층에서만** 예외를 던진다. 에러 메시지에 항상 관련 컨텍스트를 포함한다.
 
 ```kotlin
 @Service

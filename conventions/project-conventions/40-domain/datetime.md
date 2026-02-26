@@ -1,22 +1,22 @@
-# DateTime Handling
+# DateTime 처리
 
-> Store and process in UTC. Convert to KST only at the final display boundary.
+> UTC로 저장하고 처리한다. KST 변환은 최종 표시 경계에서만 수행한다.
 
-## Core Rules
+## 핵심 규칙
 
-| Rule | Description |
-|------|-------------|
-| **Internal timezone** | UTC everywhere (JVM, DB, domain logic) |
-| **Controller input** | Must be UTC. If KST arrives, convert to UTC immediately |
-| **Controller output** | UTC by default. Convert to KST only when display requires it |
-| **KST conversion** | Use `.toKst()` extension only at the response boundary (Response DTO) |
-| **Utilities** | Use `{projectGroup}.common.utils.datetime` for all datetime operations |
+| 규칙 | 설명 |
+|------|------|
+| **내부 타임존** | 모든 곳에서 UTC (JVM, DB, 도메인 로직) |
+| **Controller 입력** | UTC여야 한다. KST가 들어오면 즉시 UTC로 변환한다 |
+| **Controller 출력** | 기본 UTC. 표시가 필요할 때만 KST로 변환한다 |
+| **KST 변환** | 응답 경계(Response DTO)에서만 `.toKst()` 확장 함수를 사용한다 |
+| **유틸리티** | 모든 DateTime 작업에 `{projectGroup}.common.utils.datetime`을 사용한다 |
 
 ---
 
-## JVM Timezone Configuration
+## JVM 타임존 설정
 
-Set UTC as the JVM default timezone in every bootstrap `-app` module.
+모든 bootstrap `-app` 모듈에서 UTC를 JVM 기본 타임존으로 설정한다.
 
 ```kotlin
 fun main(args: Array<String>) {
@@ -25,31 +25,31 @@ fun main(args: Array<String>) {
 }
 ```
 
-> **IMPORTANT**: Without this configuration, `LocalDateTime.now()` returns system-local time (KST on Korean servers), causing inconsistencies.
+> **중요**: 이 설정이 없으면 `LocalDateTime.now()`가 시스템 로컬 시간(한국 서버에서는 KST)을 반환하여 불일치가 발생한다.
 
 ---
 
-## Controller Input: Always UTC
+## Controller 입력: 항상 UTC
 
-All datetime inputs in controllers must be UTC. If a client sends KST, convert to UTC immediately in the Controller layer before passing it to the application.
+컨트롤러의 모든 DateTime 입력은 UTC여야 한다. 클라이언트가 KST를 보내면 Controller 계층에서 즉시 UTC로 변환한 후 응용 계층에 전달한다.
 
 ```kotlin
-// UTC input -- pass directly
+// UTC 입력 — 그대로 전달
 @PostMapping("/events")
 fun createEvent(@Valid @RequestBody request: CreateEventRequest): ResponseEntity<ApiResource<EventResponse>> =
     ResponseEntity.ok(ApiResource.success(EventResponse.from(createEventUseCase(request.toCommand()))))
 
-// KST input -- convert to UTC immediately at the entry point
+// KST 입력 — 진입점에서 즉시 UTC로 변환
 @PostMapping("/events")
 fun createEvent(@Valid @RequestBody request: CreateEventRequest): ResponseEntity<ApiResource<EventResponse>> {
-    val utcStartAt = request.startAt.toUtc()  // convert KST → UTC here
+    val utcStartAt = request.startAt.toUtc()  // KST → UTC 변환
     return ResponseEntity.ok(ApiResource.success(EventResponse.from(
         createEventUseCase(CreateEventCommand(name = request.name, startAt = utcStartAt))
     )))
 }
 ```
 
-When timezone-aware input is needed, use `ZonedDateTime` and normalize to UTC:
+타임존 인식 입력이 필요하면 `ZonedDateTime`을 사용하고 UTC로 정규화한다:
 
 ```kotlin
 data class CreateEventApiRequest(
@@ -63,14 +63,14 @@ val utcStartAt = request.startAt.withZoneSameInstant(ZoneOffset.UTC).toLocalDate
 
 ---
 
-## Controller Output: KST Conversion at Response Boundary
+## Controller 출력: 응답 경계에서 KST 변환
 
-Convert to KST only when building the API response DTO. Domain and Service layers must never perform KST conversion.
+API 응답 DTO를 구성할 때만 KST로 변환한다. 도메인 계층과 서비스 계층에서는 KST 변환을 수행하지 않는다.
 
-Convert inside the Response DTO factory (`from()`) using `.toKst()`.
+Response DTO의 팩토리(`from()`)에서 `.toKst()`로 변환한다.
 
 ```kotlin
-// In Response DTO -- UTC → KST at response boundary
+// Response DTO에서 — UTC → KST 변환
 data class EventResponse(
     val id: Long,
     val name: String,
@@ -91,7 +91,7 @@ data class EventResponse(
 
 ---
 
-## DateTime Lifecycle
+## DateTime 생명주기
 
 ```
 [Client Request]
@@ -115,14 +115,14 @@ data class EventResponse(
 
 ---
 
-## Utility Classes
+## 유틸리티 클래스
 
-> **IMPORTANT**: Use `{projectGroup}.common.utils.datetime` for all datetime operations. Do not use raw `java.time` formatting or manual calculations.
+> **중요**: 모든 DateTime 작업에 `{projectGroup}.common.utils.datetime`을 사용한다. `java.time` 직접 포맷팅이나 수동 계산을 사용하지 않는다.
 
-### DateFormatter (parsing & formatting)
+### DateFormatter (파싱 및 포맷팅)
 
-| Method | Result |
-|--------|--------|
+| 메서드 | 결과 |
+|--------|------|
 | `"2025-01-24".toDate()` | `LocalDate` |
 | `"20250124".numericToDate()` | `LocalDate` |
 | `"2025-01-24T14:30:00".toDateTime()` | `LocalDateTime` |
@@ -132,16 +132,16 @@ data class EventResponse(
 | `dateTime.toStr()` | `"2025-01-24T14:30:00"` |
 | `dateTime.toKorean()` | `"2025년 1월 24일 14시 30분"` |
 
-### Timezone Conversion
+### 타임존 변환
 
-| Method | Direction | Use Case |
-|--------|-----------|----------|
-| `LocalDateTime.toKst()` | UTC → KST | Display in Response DTO |
-| `ZonedDateTime.toKst()` | UTC → KST | Display in Response DTO |
-| `LocalDateTime.toUtc()` | KST → UTC | Normalize KST input at controller boundary |
-| `ZonedDateTime.toUtc()` | KST → UTC | Normalize KST input at controller boundary |
+| 메서드 | 방향 | 용도 |
+|--------|------|------|
+| `LocalDateTime.toKst()` | UTC → KST | Response DTO에서 표시용 |
+| `ZonedDateTime.toKst()` | UTC → KST | Response DTO에서 표시용 |
+| `LocalDateTime.toUtc()` | KST → UTC | Controller 경계에서 KST 입력 정규화 |
+| `ZonedDateTime.toUtc()` | KST → UTC | Controller 경계에서 KST 입력 정규화 |
 
-### SearchDates (date range for queries)
+### SearchDates (쿼리용 날짜 범위)
 
 ```kotlin
 val dates = SearchDates.lastMonth()
@@ -155,33 +155,33 @@ data class OrderSearchCondition(
 )
 ```
 
-### Range Classes
+### Range 클래스
 
 ```kotlin
 val range = LocalDateRange(startDate, endDate)
-date in range                // containment check
-range.overlaps(otherRange)   // overlap check
-range.daysBetween()          // day count
+date in range                // 포함 여부 확인
+range.overlaps(otherRange)   // 겹침 확인
+range.daysBetween()          // 일수 계산
 
 val dtRange = LocalDateTimeRange(startDt, endDt)
 dtRange.hoursBetween()
 ```
 
-### Date Extensions
+### Date 확장 함수
 
 ```kotlin
 date.isToday()
 date.isPast()
-birthDate.getAge()           // International age
-birthDate.getKoreanAge()     // Korean age
+birthDate.getAge()           // 만 나이
+birthDate.getKoreanAge()     // 한국 나이
 ```
 
 ---
 
-## ISO-8601 Formats
+## ISO-8601 형식
 
-| Type | Format | Example |
-|------|--------|---------|
+| 타입 | 형식 | 예시 |
+|------|------|------|
 | Date | `yyyy-MM-dd` | `2025-01-02` |
 | Time | `HH:mm:ss` | `14:30:00` |
 | DateTime | `yyyy-MM-dd'T'HH:mm:ss` | `2025-01-02T14:30:00` |
