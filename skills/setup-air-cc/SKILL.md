@@ -231,7 +231,7 @@ Verify the plugin structure is complete. Check each component and report status.
 
 ## Step 3: CLAUDE.md Block Management
 
-Manage the `<!--air-claudecode:start-->` / `<!--air-claudecode:end-->` block in the user's global CLAUDE.md (`~/.claude/CLAUDE.md`).
+Manage the `<\!--air-claudecode:start-->` / `<\!--air-claudecode:end-->` block in the user's global CLAUDE.md (`~/.claude/CLAUDE.md`).
 
 This step only creates/maintains the marker block. The block is a minimal placeholder -- users can add custom content between the markers later.
 
@@ -243,7 +243,7 @@ cat ~/.claude/CLAUDE.md 2>/dev/null || echo "FILE_NOT_EXISTS"
 
 ### 3-2. Check for existing block
 
-Search for `<!--air-claudecode:start-->` and `<!--air-claudecode:end-->` markers.
+Search for `<\!--air-claudecode:start-->` and `<\!--air-claudecode:end-->` markers.
 
 ### 3-3. Generate block content
 
@@ -256,10 +256,10 @@ cat .claude-plugin/plugin.json | jq -r '.version'
 **Block template:**
 
 ```markdown
-<!--air-claudecode:start-->
-<!-- air-claudecode v{version} — auto-generated, do not edit manually -->
-<!-- To update: /air-claudecode:setup-air-cc --update -->
-<!--air-claudecode:end-->
+<\!--air-claudecode:start-->
+<\!-- air-claudecode v{version} — auto-generated, do not edit manually -->
+<\!-- To update: /air-claudecode:setup-air-cc --update -->
+<\!--air-claudecode:end-->
 ```
 
 The block is intentionally minimal. Users can add custom instructions between the markers as needed.
