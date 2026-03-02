@@ -51,7 +51,8 @@ Important rules:
 
 ## Create PR — Confirmation Template
 
-Present to user via `AskUserQuestion` before creating:
+Present to user via `AskUserQuestion` before creating.
+Use the `markdown` preview field on the **Create PR** option to show the full PR preview. This renders a monospace preview panel for easy review.
 
 ```
 main ← feature/PROJ-456-jwt-refresh

@@ -101,7 +101,10 @@ Context-dependent detail collection:
 
 ### Step 3 — Confirm Before Execution
 
-Always confirm via AskUserQuestion before any state-changing operation. Use these templates:
+Always confirm via AskUserQuestion before any state-changing operation.
+Use the `markdown` preview field on the **Proceed** option to show the full operation preview. This renders a monospace preview panel for easy review.
+
+Use these templates:
 
 **Start confirmation:**
 ```

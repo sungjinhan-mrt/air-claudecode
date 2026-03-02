@@ -71,7 +71,9 @@ When user says "auto commit", "자동 커밋", or argument contains `--auto`:
 
 5. **Show and confirm** (skip in Auto Mode -- go directly to step 6)
 
-   Present to user via `AskUserQuestion`:
+   Present to user via `AskUserQuestion`.
+   Use the `markdown` preview field on the **Commit** option to show the full commit preview (branch, changed files, commit message). This renders a monospace preview panel for easy review.
+
    ```
    Branch: feature/PROJ-456-jwt-refresh
 
