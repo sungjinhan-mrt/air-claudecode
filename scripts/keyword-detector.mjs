@@ -28,6 +28,13 @@ async function readStdin() {
  */
 const SKILL_KEYWORDS = {
     "git-commit": ["commit", "커밋", "커밋해", "commit this", "커밋 만들"],
+    "git-flow-master": [
+        "git flow", "깃플로우", "깃 플로우",
+        "feature start", "feature finish", "feature publish",
+        "release start", "release finish", "release publish",
+        "hotfix start", "hotfix finish", "hotfix publish",
+        "flow init", "flow overview",
+    ],
     "git-branch": ["create branch", "브랜치 만들", "branch from", "new branch", "브랜치 생성"],
     "git-pr-master": ["pr", "pr 만들", "pr 생성", "create pr", "open pr", "merge pr", "pull request", "풀 리퀘스트"],
     "git-issue-master": ["git issue", "github issue", "깃 이슈", "깃헙 이슈", "이슈 만들", "이슈 생성", "create issue", "file issue", "open issue"],
