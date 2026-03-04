@@ -66,7 +66,7 @@ Create a git branch with conventional naming. Fetches Jira ticket details when a
 
 4. **Create branch** only after user confirms
    - `git fetch origin`
-   - `git checkout -b {branch-name} origin/{base-branch}`
+   - `git checkout -b {branch-name} --no-track origin/{base-branch}`
    - Show result: branch name and current status
 
 ## Examples
