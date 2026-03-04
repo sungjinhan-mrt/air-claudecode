@@ -137,26 +137,33 @@ import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty
 
 #### Naming Conventions
 
-- **Class names**: PascalCase matching the XSD type name, with optional API version suffix (e.g., `NumberOfUnit24`)
+- **Class names**: PascalCase matching the XSD type name, with optional API version suffix (e.g., `NumberOfUnit24`). Apply singular form — each class represents a single instance (e.g., `NumberOfUnitsType` → `NumberOfUnitType`, `StatusDetailsType` → `StatusDetailType`)
 - **Strip XSD internal version suffixes**: XSD type names often include internal version identifiers at the end. Use the regex pattern `_?\d{3,}[A-Z]?$` (anchored to string end) to identify and remove these suffixes. The pattern matches:
   - An optional underscore (`_?`)
   - Three or more consecutive digits (`\d{3,}`)
   - An optional single uppercase letter (`[A-Z]?`)
 
-  When stripping, preserve any single uppercase letters (e.g., `I`, `U`) that appear immediately before the underscore or numeric suffix, as these are part of the type name, not the version identifier. Examples:
+  Examples:
   - `FareFamilyType_80157S` → `FareFamilyType`
-  - `StatusDetailsTypeI_185722C` → `StatusDetailsTypeI` (preserve `I`)
   - `MonetaryInformationType198917S` → `MonetaryInformationType` (no underscore case)
   - `AddressDetailsTypeU_198210C` → `AddressDetailsTypeU` (preserve `U`)
+- **Strip trailing `I` suffix from class names**: after removing the version suffix, also remove a trailing `I` that XSD uses as an internal type variant marker. This `I` is not meaningful in the Kotlin domain model. Examples:
+  - `StatusDetailsTypeI_185722C` → strip version → `StatusDetailsTypeI` → strip `I` → `StatusDetailsType`
+  - `ItemNumberTypeI_192331C` → `ItemNumberType`
+  - `SelectionDetailsTypeI_185689C` → `SelectionDetailsType`
+  - Note: other trailing letters like `U` are preserved as they carry domain meaning
 - **No root prefix on child classes**: child/supporting class names use the XSD `complexType` name directly — do NOT prefix them with the root element name. For example, if the root element is `FareMasterPricerTravelBoardSearch` and a child type is `NumberOfUnitsType`, the class name is `NumberOfUnitsType` (or `NumberOfUnitsType24` with suffix), NOT `FareMasterPricerTravelBoardSearchNumberOfUnitsType`
 - **Name collision handling**: after stripping version suffixes, multiple XSD types may produce the same Kotlin class name within a single file. Resolve collisions by prefixing with the **parent class name** (the class that declares a property of that type), only for the conflicting types:
   - If `StatusType_68675S` is referenced by `FraudScreeningGroupType` and `StatusType_68646S` is referenced by `MopGroup`, rename to `FraudScreeningGroupStatusType` and `MopGroupStatusType`
   - Non-conflicting types remain unprefixed (e.g., a sole `FareFamilyType_80157S` → `FareFamilyType`)
   - If the same XSD type (same version suffix) is referenced by multiple parents, choose the first parent in alphabetical order
   - If a collision still exists after prefixing (e.g., two types used by the same parent), append a numeric disambiguator: `ParentStatusType`, `ParentStatusType2`
-- **Field names**: camelCase matching the XSD element name
-- **Single field names**: when `maxOccurs` is 1 or omitted (not a List), use singular form if the XML element name is plural (e.g., `errorDetails` → `errorDetail`, `taxInformations` → `taxInformation`)
-- **List field names**: when `maxOccurs > 1` (List), use plural form if the XML element name is singular (e.g., `itinerary` → `itineraries`)
+- **Field names**: camelCase matching the XSD element name, with singular/plural adjusted by `maxOccurs`:
+
+  | maxOccurs | Kotlin type | Naming rule | Example |
+  |---|---|---|---|
+  | `1` or omitted | `T` (single) | **Singular** — even if the XML element name is plural | `errorDetails` → `errorDetail`, `taxInformations` → `taxInformation` |
+  | `> 1` or `unbounded` | `List<T>` | **Plural** — even if the XML element name is singular | `itinerary` → `itineraries`, `passenger` → `passengers` |
 - **Suffix**: if a suffix is used (e.g., `24`), apply it to ALL classes in the file consistently
 
 #### Structural Rules
@@ -201,6 +208,10 @@ Fix any compilation errors before finishing.
 | Missing namespace on root | Root class needs namespace for SOAP envelope parsing | Add `namespace` parameter to `@JsonRootName` |
 | Non-nullable optional field | XSD `minOccurs="0"` mapped as non-nullable | Always use `?` for optional fields |
 | Version suffix in class name | XSD type names include internal version IDs like `_80157S` | Strip the `_?\d{3,}[A-Z]?$` suffix (end-anchored); resolve collisions with parent class prefix |
+| Trailing `I` in class name | XSD type variant marker `I` left in class name (e.g., `StatusDetailsTypeI`) | Strip trailing `I` after version suffix removal |
+| Plural class name | Class named `NumberOfUnitsType` instead of `NumberOfUnitType` | Use singular form for all class names |
+| Singular List field name | List field uses singular name (e.g., `passenger: List<T>`) | Use plural form for List fields (`passengers: List<T>`) |
+| Plural non-List field name | Non-List field uses plural name (e.g., `errorDetails: T`) | Use singular form for non-List fields (`errorDetail: T`) |
 
 ## Checklist
 
@@ -214,6 +225,8 @@ Fix any compilation errors before finishing.
 - [ ] All classes are top-level in a single file (no inner/nested classes)
 - [ ] No type reuse from other packages — all types defined locally
 - [ ] XSD internal version suffixes stripped from all class names (no `_80157S`, `48648C`, etc.)
+- [ ] Trailing `I` suffix stripped from class names (e.g., `StatusDetailsTypeI` → `StatusDetailsType`)
+- [ ] Class names use singular form (e.g., `NumberOfUnitsType` → `NumberOfUnitType`)
 - [ ] Name collisions after suffix stripping resolved with parent class prefix
 - [ ] File placed in correct package (`client/request/` or `client/response/`)
 - [ ] API version suffix applied consistently to all class names (if applicable)
