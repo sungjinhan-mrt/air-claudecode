@@ -70,7 +70,7 @@ This checks all prerequisites, offers to install missing tools, sets up the CLAU
 
 ## Project Conventions
 
-Team-specific development conventions in [`conventions/project-conventions/`](conventions/project-conventions/).
+Team-specific development conventions in [`conventions/project-conventions/`](plugins/air-claudecode/conventions/project-conventions/).
 
 ---
 

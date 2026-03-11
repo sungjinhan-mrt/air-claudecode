@@ -414,30 +414,36 @@ AI에게는 룩업 테이블이 주입된다. AI가 "controller를 작성해야 
 
 ```
 air-claudecode/
-  .claude-plugin/           # 플러그인 메타데이터
-    plugin.json
+  .claude-plugin/             # 마켓플레이스 레지스트리
     marketplace.json
-  skills/                   # 20개 스킬 정의
-    software-engineer/
-    code-review/
-    git-commit/
-    ...
-  agents/                   # 12개 에이전트 프롬프트
-    software-engineer.md
-    code-reviewer.md
-    ...
-  conventions/              # 팀 코딩 표준
-    naming-conventions.md
-    git-workflow.md
-    project-conventions/
-  hooks/                    # Hook 등록
-    hooks.json
-  scripts/                  # Hook 실행 스크립트
-    commit-guard.mjs
-    pr-guard.mjs
-    keyword-detector.mjs
-    air-guide-injector.mjs
-    session-start.mjs
-  docs/                     # 설치 가이드
+  docs/                       # 설치 가이드
     install-guide/
+  plugins/
+    air-claudecode/           # 메인 플러그인
+      .claude-plugin/
+        plugin.json
+      skills/                 # 20개 스킬 정의
+        software-engineer/
+        code-review/
+        git-commit/
+        ...
+      agents/                 # 12개 에이전트 프롬프트
+        software-engineer.md
+        code-reviewer.md
+        ...
+      conventions/            # 팀 코딩 표준
+        naming-conventions.md
+        git-workflow.md
+        project-conventions/
+      hooks/                  # Hook 등록
+        hooks.json
+      scripts/                # Hook 실행 스크립트
+        commit-guard.mjs
+        pr-guard.mjs
+        keyword-detector.mjs
+        air-guide-injector.mjs
+        session-start.mjs
+      reference/              # 프로젝트별 개발 가이드
+        air-project-guide/
+    air-scaffold/             # 프로젝트 스캐폴딩 플러그인
 ```
