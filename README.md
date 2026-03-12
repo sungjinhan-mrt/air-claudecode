@@ -1,4 +1,6 @@
-# air-claudecode
+# air-claudecode (personal fork)
+
+> Forked from [myrealtrip/air-claudecode](https://github.com/myrealtrip/air-claudecode) for personal customization.
 
 **Lightweight skill-sharing plugin for Claude Code teams. Zero dependencies, zero config.**
 
@@ -24,7 +26,7 @@
 In Claude Code, run:
 
 ```
-/plugin marketplace add https://github.com/myrealtrip/air-claudecode
+/plugin marketplace add https://github.com/sungjinhan-mrt/air-claudecode
 ```
 
 ### 2. Install the plugin
@@ -88,3 +90,7 @@ Team-specific development conventions in [`conventions/project-conventions/`](pl
 
 - **YoungKwang Kim** - [@gykk16](https://github.com/gykk16)
 - **SungHoon Lee** - [@hooniis](https://github.com/hooniis)
+
+### Fork Maintainer
+
+- **SungJin Han** - [@sungjinhan-mrt](https://github.com/sungjinhan-mrt)
