@@ -35,11 +35,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/commit-guard.mjs\"",
-            "timeout": 5
-          },
-          {
-            "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/pr-guard.mjs\"",
             "timeout": 5
           }

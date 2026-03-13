@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Create conventional commit messages with Jira/GitHub issue linking and user confirmation
+description: Create conventional commit messages with Jira/GitHub issue linking
 model: sonnet
 argument-hint: "[--auto] [message context]"
 ---
@@ -13,11 +13,9 @@ argument-hint: "[--auto] [message context]"
 
 2. **Draft** — write a conventional commit message from the gathered data
 
-3. **Confirm** — show preview via AskUserQuestion, then commit after approval
+3. **Confirm** — print the commit preview, then commit after user approval
 
 </workflow>
-
-Auto Mode (`--auto`, "auto commit", "자동 커밋"): skip step 3, commit directly.
 
 ---
 
@@ -66,33 +64,21 @@ If the diff contains multiple unrelated concerns, suggest splitting into separat
 
 ## Step 3: Confirm
 
-Use `AskUserQuestion` with the `markdown` preview field on the Commit option. Follow this exact structure:
+Print the commit preview as text output (do NOT use AskUserQuestion):
 
 ```
-AskUserQuestion(
-  question: "Ready to commit. Please review:"
-  header: "Commit"
-  options:
-    - label: "Commit"
-      description: "Proceed with this message"
-      markdown: |
-        Branch: {branch_name}
+Branch: {branch_name}
 
-        Changed files:
-        {git status output — M/A/D prefixed file list}
+Changed files:
+{git status output — M/A/D prefixed file list}
 
-        Commit message:
-        ─────────────────
-        {full commit message including footer}
-        ─────────────────
-    - label: "Edit"
-      description: "Modify the message before committing"
-    - label: "Cancel"
-      description: "Abort the commit"
-)
+Commit message:
+─────────────────
+{full commit message including footer}
+─────────────────
 ```
 
-After user selects "Commit":
+Wait for user approval, then:
 
 1. Stage files if needed: `git add <specific files>`
 2. Commit using HEREDOC: `git commit -m "$(cat <<'EOF' ... EOF)"`
@@ -121,7 +107,6 @@ AI-authored: 90%
 - [ ] Subject is imperative mood, lowercase, under 50 chars, no period
 - [ ] Jira ticket linked in footer if detected from branch
 - [ ] GitHub issue linked in footer if detected
-- [ ] Changed files and full message shown to user before commit (Default Mode)
-- [ ] User explicitly confirmed via AskUserQuestion (Default Mode) or Auto Mode detected
+- [ ] Changed files and full message printed as text output before commit
 - [ ] AI-authored percentage **always** included in footer (integer, no decimals) — never omit this line
 - [ ] Multiple concerns flagged for splitting if detected
