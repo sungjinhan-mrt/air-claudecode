@@ -30,10 +30,10 @@ If `$ARGUMENTS` is provided and matches one of the above repo names, only review
 
 ## State File
 
-Path: `~/.claude/pr-reviews/state.json`
+Path: `.claude/reviews/state.json`
 
 Load current state:
-!`mkdir -p ~/.claude/pr-reviews/reviews && cat ~/.claude/pr-reviews/state.json 2>/dev/null || echo '{}'`
+!`mkdir -p .claude/reviews && cat .claude/reviews/state.json 2>/dev/null || echo '{}'`
 
 ## Review Guidelines
 
@@ -81,7 +81,7 @@ For each unreviewed PR:
 3. Perform the review following the guidelines above. Output in Korean.
 
 4. Save the review to a markdown file:
-   - Path: `~/.claude/pr-reviews/reviews/<repo>_PR<number>_<commit_hash>.md`
+   - Path: `.claude/reviews/<repo>_PR<number>_<commit_hash>.md`
    - Format:
 
    ```markdown
@@ -93,6 +93,7 @@ For each unreviewed PR:
    - **Reviewed Commit**: <commit hash>
    - **Review Date**: <current date>
    - **Status**: [Approved | Request Changes | Comment Only]
+   - **PR URL**: https://github.com/myrealtrip/<repo>/pull/<number>
 
    ---
 
@@ -101,27 +102,31 @@ For each unreviewed PR:
 
    ---
 
-   ## Issues Found
+   ## Review Comments
+
+   Below is a checklist of review comments. Check the ones you want to post to GitHub, then instruct Claude to submit them.
 
    ### Critical (P0)
-   | File | Line | Issue | Recommendation |
-   |------|------|-------|----------------|
+   - [ ] `<file>:<line>` — [comment in Korean]
+   - [ ] `<file>:<line>` — [comment in Korean]
 
    ### Major (P1)
-   | File | Line | Issue | Recommendation |
-   |------|------|-------|----------------|
+   - [ ] `<file>:<line>` — [comment in Korean]
 
    ### Minor (P2)
-   | File | Line | Issue | Recommendation |
-   |------|------|-------|----------------|
+   - [ ] `<file>:<line>` — [comment in Korean]
 
    ### NIT
-   - ...
+   - [ ] `<file>:<line>` — [comment in Korean]
 
-   ---
+   ### Suggestions
+   - [ ] `<file>:<line>` — [comment in Korean]
 
-   ## Highlights
-   - [Good practices observed]
+   ### Questions
+   - [ ] `<file>:<line>` — [comment in Korean]
+
+   ### Praise
+   - `<file>:<line>` — [comment in Korean]
 
    ---
 
@@ -132,9 +137,17 @@ For each unreviewed PR:
    | Critical Issues | ## |
    | Major Issues | ## |
    | Minor Issues | ## |
+   | Suggestions | ## |
    ```
 
-5. Update the state file (`~/.claude/pr-reviews/state.json`):
+   **Comment format rules:**
+   - Every issue MUST have a specific `file:line` reference from the diff
+   - Each comment should be actionable — include what's wrong and how to fix it
+   - Use the checkbox `- [ ]` format for all issues (P0 ~ Suggestions, Questions) so the user can select which to post
+   - Praise items use `- ` without checkbox (not actionable)
+   - Group comments by severity, not by file
+
+5. Update the state file (`.claude/reviews/state.json`):
    - Read current state, add the new entry under the repo key:
      ```json
      {
@@ -165,13 +178,15 @@ After processing all repos, output a summary table:
 | ... | ... | ... | ... | ... | ... |
 
 New reviews: N | Skipped (already reviewed): N | Total open: N
-Reviews saved to: ~/.claude/pr-reviews/reviews/
+Reviews saved to: .claude/reviews/
 ```
 
 ## Important Rules
 
 - NEVER post review comments directly to GitHub — only save locally
 - NEVER approve or merge PRs — this is read-only monitoring
+- Every issue MUST reference a specific `file:line` from the PR diff
+- Use `- [ ]` checkbox format for all actionable items so user can select and post later
 - Be pragmatic — don't over-engineer simple changes, focus on real issues
 - Keep reviews concise — max 15 issues per PR unless critical issues require more
 - If `gh` CLI fails for a repo (permissions, not found), log the error and continue with other repos
