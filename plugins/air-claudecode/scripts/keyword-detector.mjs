@@ -50,6 +50,7 @@ const SKILL_KEYWORDS = {
     "sentence-refiner": ["문장 다듬", "문장 교정", "sentence refine", "refine sentence", "문장 수정", "문체 교정"],
     "deep-dive-plan": ["deep dive plan", "deep plan", "심층 분석", "계획 수립", "deep dive", "implementation plan", "구현 계획"],
     "xsd-to-kotlin": ["xsd", "xsd to kotlin", "xml schema", "xsd 변환", "xsd 코틀린", "스키마 변환", "xml 스키마", "soap model", "data class from xsd", "xsd data class"],
+    "git-pr-babysit": ["babysit", "pr babysit", "pr 모니터링", "pr monitoring", "pr 감시", "pr 리뷰 자동"],
 };
 
 /**
