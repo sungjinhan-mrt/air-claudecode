@@ -5,7 +5,7 @@
   "owner": {
     "name": "YoungKwang Kim, SungHoon Lee"
   },
-  "version": "0.3.2",
+  "version": "0.3.3",
   "metadata": {
     "pluginRoot": "./plugins"
   },
@@ -13,7 +13,7 @@
     {
       "name": "air-claudecode",
       "description": "Share coding standards, review checklists, and workflow skills across your team. Zero dependencies.",
-      "version": "0.3.2",
+      "version": "0.3.3",
       "author": {
         "name": "YoungKwang Kim, SungHoon Lee"
       },
