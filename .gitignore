@@ -3,3 +3,4 @@ node_modules/
 *.log
 .omc/
 .idea/
+*.ko.md
