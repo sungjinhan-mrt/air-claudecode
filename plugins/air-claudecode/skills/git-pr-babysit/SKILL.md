@@ -91,7 +91,11 @@ When multiple PRs need review, launch subagents **in parallel** (multiple Agent 
    - Write the review file to the specified path
 
 **Subagent review output file:**
-   - Path: `.claude/reviews/<repo>/PR<number>_<commit_hash>.md`
+   - Path: `.claude/reviews/<repo>/<pr_number>/<seq>_<commit_hash>.md`
+   - `<seq>` is a sequential number starting from 1, incremented for each review of the same PR
+   - To determine `<seq>`, count existing `*.md` files in `.claude/reviews/<repo>/<pr_number>/` and add 1
+   - Example: first review → `1_abc1234.md`, PR gets new commits → `2_def5678.md`
+   - The subagent must create the `<pr_number>/` directory if it doesn't exist
    - Format:
 
    ```markdown
@@ -168,7 +172,7 @@ When multiple PRs need review, launch subagents **in parallel** (multiple Agent 
            "title": "<title>",
            "author": "<author>",
            "reviewed_at": "<ISO timestamp>",
-           "review_file": "<repo>/PR<number>_<commit_hash>.md",
+           "review_file": "<repo>/<pr_number>/<seq>_<commit_hash>.md",
            "status": "<Approved|Request Changes|Comment Only>"
          }
        }
@@ -188,7 +192,7 @@ After processing all repos, output a summary table:
 | ... | ... | ... | ... | ... | ... |
 
 New reviews: N | Skipped (already reviewed): N | Total open: N
-Reviews saved to: .claude/reviews/<repo>/
+Reviews saved to: .claude/reviews/<repo>/<pr_number>/
 ```
 
 ## Important Rules
