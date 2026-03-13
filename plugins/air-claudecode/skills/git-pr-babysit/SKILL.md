@@ -4,7 +4,7 @@ description: Monitor open PRs across air-* repos and auto-review new/updated one
 disable-model-invocation: true
 context: fork
 agent: general-purpose
-allowed-tools: Bash, Read, Write, Glob, Grep
+allowed-tools: Bash, Read, Write, Glob, Grep, Agent
 argument-hint: "[optional: specific repo name to review]"
 ---
 
@@ -33,7 +33,7 @@ If `$ARGUMENTS` is provided and matches one of the above repo names, only review
 Path: `.claude/reviews/state.json`
 
 Load current state:
-!`mkdir -p .claude/reviews && cat .claude/reviews/state.json 2>/dev/null || echo '{}'`
+!`mkdir -p .claude/reviews/air-console .claude/reviews/air-insurance .claude/reviews/air-international .claude/reviews/air-navigator .claude/reviews/air-notification .claude/reviews/air-pricing .claude/reviews/air-reconciliation && cat .claude/reviews/state.json 2>/dev/null || echo '{}'`
 
 ## Review Guidelines
 
@@ -64,24 +64,34 @@ Repos checked: 7 | Open PRs: N | Already reviewed: N
 ```
 And stop here.
 
-### Step 3: Review Each New/Updated PR
+### Step 3: Review Each New/Updated PR — Subagent Delegation
 
-For each unreviewed PR:
+**Each PR review MUST be delegated to a subagent using the Agent tool.** This enables parallel reviews and protects the main context window.
 
-1. Fetch the diff:
-   ```bash
-   gh pr diff <number> -R myrealtrip/<repo>
-   ```
+For each unreviewed PR, spawn a subagent:
 
-2. Fetch PR details (description, comments):
-   ```bash
-   gh pr view <number> -R myrealtrip/<repo>
-   ```
+```
+Agent(
+  description: "Review <repo> PR #<number>",
+  prompt: "<see below>",
+  mode: "bypassPermissions"
+)
+```
 
-3. Perform the review following the guidelines above. Output in Korean.
+When multiple PRs need review, launch subagents **in parallel** (multiple Agent calls in a single message) to maximize throughput.
 
-4. Save the review to a markdown file:
-   - Path: `.claude/reviews/<repo>_PR<number>_<commit_hash>.md`
+**Subagent prompt must include:**
+1. The repo name, PR number, and commit hash
+2. The full review guidelines (from references/review-guidelines.md above)
+3. The review output format (from Step 3 below)
+4. Instructions to:
+   - Fetch the diff: `gh pr diff <number> -R myrealtrip/<repo>`
+   - Fetch PR details: `gh pr view <number> -R myrealtrip/<repo>`
+   - Perform the review in Korean
+   - Write the review file to the specified path
+
+**Subagent review output file:**
+   - Path: `.claude/reviews/<repo>/PR<number>_<commit_hash>.md`
    - Format:
 
    ```markdown
@@ -147,7 +157,7 @@ For each unreviewed PR:
    - Praise items use `- ` without checkbox (not actionable)
    - Group comments by severity, not by file
 
-5. Update the state file (`.claude/reviews/state.json`):
+5. After all subagents complete, the **main agent** updates the state file (`.claude/reviews/state.json`):
    - Read current state, add the new entry under the repo key:
      ```json
      {
@@ -158,7 +168,7 @@ For each unreviewed PR:
            "title": "<title>",
            "author": "<author>",
            "reviewed_at": "<ISO timestamp>",
-           "review_file": "<repo>_PR<number>_<commit_hash>.md",
+           "review_file": "<repo>/PR<number>_<commit_hash>.md",
            "status": "<Approved|Request Changes|Comment Only>"
          }
        }
@@ -178,7 +188,7 @@ After processing all repos, output a summary table:
 | ... | ... | ... | ... | ... | ... |
 
 New reviews: N | Skipped (already reviewed): N | Total open: N
-Reviews saved to: .claude/reviews/
+Reviews saved to: .claude/reviews/<repo>/
 ```
 
 ## Important Rules
