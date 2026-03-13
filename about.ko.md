@@ -78,7 +78,7 @@ AI가 속도를 높일수록 일관성 없는 코드가 더 빠르게 쌓인다.
 
 ```bash
 # 설치
-/plugin marketplace add https://github.com/myrealtrip/air-claudecode
+/plugin marketplace add https://github.com/sungjinhan-mrt/air-claudecode
 /plugin install air-claudecode
 
 # 업데이트
@@ -396,7 +396,7 @@ AI에게는 룩업 테이블이 주입된다. AI가 "controller를 작성해야 
 
 ```bash
 # 설치 (Claude Code에서)
-/plugin marketplace add https://github.com/myrealtrip/air-claudecode
+/plugin marketplace add https://github.com/sungjinhan-mrt/air-claudecode
 /plugin install air-claudecode
 
 # 환경 진단 + 원클릭 설치

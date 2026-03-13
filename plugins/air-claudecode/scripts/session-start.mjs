@@ -19,7 +19,7 @@ const CACHE_PATH = "/tmp/air-claudecode-update-cache.json";
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 3000;
 const RAW_PACKAGE_URL =
-  "https://raw.githubusercontent.com/myrealtrip/air-claudecode/main/plugins/air-claudecode/package.json";
+  "https://raw.githubusercontent.com/sungjinhan-mrt/air-claudecode/main/plugins/air-claudecode/package.json";
 
 // --- Version check functions ---
 
